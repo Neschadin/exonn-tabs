@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { useClickOutside } from '../../hooks/use-click-outside';
 import { findItem, removeItem } from '../../utils/utils';
+import { useTabsCtx } from '../../hooks/use-tabs-ctx';
 
 const useOverflowMenu = (
-  trackingTabs: TTabItem[],
-  stopObserving: boolean,
-  removeTab: (id: string, type: 'pinnedTabs' | 'unpinnedTabs') => void
+  observableContainer: HTMLDivElement | null,
+  pauseObserving: boolean
 ) => {
+  const { unpinnedTabs, removeTab } = useTabsCtx();
   const [overflowTabs, setOverflowTabs] = useState<TTabItem[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
   const openMenu = (event: MouseEvent<HTMLElement>) =>
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -22,10 +23,10 @@ const useOverflowMenu = (
     setOverflowTabs(newOverflowTabs);
   };
 
-  useClickOutside(containerRef, closeMenu, !!anchorEl);
+  useClickOutside(menuContainerRef, closeMenu, !!anchorEl);
 
   useEffect(() => {
-    if (stopObserving) return;
+    if (!observableContainer || pauseObserving) return;
 
     const observerCallback: IntersectionObserverCallback = (entries) => {
       const setNewState = (prev: TTabItem[]) => {
@@ -33,7 +34,7 @@ const useOverflowMenu = (
 
         entries.forEach((entry) => {
           const tabId = entry.target.getAttribute('data-tab-id') || '';
-          const tab = findItem(trackingTabs, tabId);
+          const tab = findItem(unpinnedTabs, tabId);
           if (tab && !entry.isIntersecting) {
             const exist = prev.some((t) => t.id === tabId);
             !exist && newOverflowTabs.push(tab);
@@ -50,20 +51,20 @@ const useOverflowMenu = (
     };
 
     const observer = new IntersectionObserver(observerCallback, {
-      root: document.getElementById('unpinnedTabsContainer'),
+      root: observableContainer,
       rootMargin: '0px',
       threshold: 0.5,
     });
 
-    trackingTabs.forEach((tab) => {
+    unpinnedTabs.forEach((tab) => {
       const tabElement = document.querySelector(`[data-tab-id="${tab.id}"]`);
       tabElement && observer.observe(tabElement);
     });
 
     return () => observer.disconnect();
-  }, [trackingTabs, stopObserving]);
+  }, [observableContainer, unpinnedTabs, pauseObserving]);
 
-  return { overflowTabs, anchorEl, containerRef, openMenu, closeTab };
+  return { overflowTabs, anchorEl, menuContainerRef, openMenu, closeTab };
 };
 
 export { useOverflowMenu };

@@ -1,27 +1,27 @@
-import { useState } from 'react';
-import { useStore } from '../../hooks/use-store';
-import { findItem, removeItem } from '../../utils/utils';
-import { DropResult } from '@hello-pangea/dnd';
+import { createContext, useState, ReactNode } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { findItem, removeItem } from '../utils/utils';
+import { useStore } from '../hooks/use-store';
 import { useRouterState } from '@tanstack/react-router';
 
-export const useTabsBar = () => {
+interface TabsContextType {
+  pathname: string;
+  unpinnedTabs: TTabItem[];
+  pinnedTabs: TTabItem[];
+  setPinnedTabs: Dispatch<SetStateAction<TTabItem[]>>;
+  setUnpinnedTabs: Dispatch<SetStateAction<TTabItem[]>>;
+  removeTab: (id: string, type: 'pinnedTabs' | 'unpinnedTabs') => void;
+  handlePinTab: (id: string) => (action: 'pin' | 'unpin') => void;
+}
+
+export const TabsCtx = createContext<TabsContextType | undefined>(undefined);
+
+export const TabsProvider = ({ children }: { children: ReactNode }) => {
   const [unpinnedTabs, setUnpinnedTabs] = useState<TTabItem[]>([]);
   const [pinnedTabs, setPinnedTabs] = useState<TTabItem[]>([]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useStore(pathname, unpinnedTabs, pinnedTabs, setPinnedTabs, setUnpinnedTabs);
-
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination, type } = result;
-    if (!destination) return;
-
-    const newOrder =
-      type === 'pinnedTabs' ? [...pinnedTabs] : [...unpinnedTabs];
-    const [moved] = newOrder.splice(source.index, 1);
-    newOrder.splice(destination.index, 0, moved);
-
-    type === 'pinnedTabs' ? setPinnedTabs(newOrder) : setUnpinnedTabs(newOrder);
-  };
 
   const removeTab = (id: string, type: 'pinnedTabs' | 'unpinnedTabs') =>
     type === 'pinnedTabs'
@@ -40,12 +40,19 @@ export const useTabsBar = () => {
     }
   };
 
-  return {
-    unpinnedTabs,
-    pinnedTabs,
-    pathname,
-    onDragEnd,
-    removeTab,
-    handlePinTab,
-  };
+  return (
+    <TabsCtx.Provider
+      value={{
+        pathname,
+        unpinnedTabs,
+        pinnedTabs,
+        setPinnedTabs,
+        setUnpinnedTabs,
+        removeTab,
+        handlePinTab,
+      }}
+    >
+      {children}
+    </TabsCtx.Provider>
+  );
 };

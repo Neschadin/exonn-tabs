@@ -42,7 +42,7 @@ export const Tab = (props: TProps) => {
   const CloseIcon = icons.CloseIcon;
 
   const handleMouseEnter = () => {
-    const t = isOverflow ? 300 : 1000;
+    const t = isOverflow ? 200 : 1000;
     hoverTimeoutRef.current = setTimeout(() => {
       setIsHovered(true);
     }, t);

@@ -15,13 +15,11 @@ import {
 } from '@mui/material';
 
 import BtnArrowIcon from '../../assets/icons/btn-arrow-icon.svg?react';
+import { useTabsCtx } from '../../hooks/use-tabs-ctx';
 
 type TProps = {
-  pathname: string;
-  trackingTabs: TTabItem[];
-  stopObserving: boolean;
-  removeTab: (id: string, type: 'pinnedTabs' | 'unpinnedTabs') => void;
-  handlePinTab: (id: string) => (action: 'pin' | 'unpin') => void;
+  pauseObserving: boolean;
+  observableContainer: HTMLDivElement | null;
 };
 
 const btnSx: SxProps = {
@@ -34,12 +32,11 @@ const btnSx: SxProps = {
   overflow: 'hidden',
 };
 
-const OverflowMenu = (props: TProps) => {
-  const { pathname, trackingTabs, stopObserving, removeTab, handlePinTab } =
-    props;
+const OverflowMenu = ({ pauseObserving, observableContainer }: TProps) => {
+  const { pathname, handlePinTab } = useTabsCtx();
 
-  const { overflowTabs, anchorEl, containerRef, openMenu, closeTab } =
-    useOverflowMenu(trackingTabs, stopObserving, removeTab);
+  const { overflowTabs, anchorEl, menuContainerRef, openMenu, closeTab } =
+    useOverflowMenu(observableContainer, pauseObserving);
 
   const renderBtn = (
     <Button
@@ -62,7 +59,7 @@ const OverflowMenu = (props: TProps) => {
   );
 
   return (
-    <Box ref={containerRef} ml='auto' height='100%'>
+    <Box ref={menuContainerRef} ml='auto' height='100%'>
       {renderBtn}
 
       <Popper

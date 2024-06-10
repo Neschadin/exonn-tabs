@@ -2,13 +2,7 @@ import { Stack, SxProps } from '@mui/material';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 
 import { Tab } from '../tab/tab';
-
-type TProps = {
-  pathname: string;
-  pinnedTabs: TTabItem[];
-  handlePinTab: (id: string) => (action: 'pin' | 'unpin') => void;
-  removeTab: (id: string, type: 'pinnedTabs' | 'unpinnedTabs') => void;
-};
+import { useTabsCtx } from '../../hooks/use-tabs-ctx';
 
 const pinnedTabsSx: SxProps = {
   flexDirection: 'row',
@@ -18,8 +12,8 @@ const pinnedTabsSx: SxProps = {
   borderColor: '#aeb6ce33',
 };
 
-export const PinnedTabs = (props: TProps) => {
-  const { pathname, pinnedTabs, handlePinTab, removeTab } = props;
+export const PinnedTabs = () => {
+  const { pathname, pinnedTabs, removeTab, handlePinTab } = useTabsCtx();
 
   return (
     <Droppable

@@ -5,13 +5,7 @@ import { useScrollContainer } from './use-scroll-container';
 import { OverflowMenu } from '../overflow-menu/overflow-menu';
 import { Tab } from '../tab/tab';
 import { ScrollShadowBar } from '../scroll-shadow-bar/scroll-shadow-bar';
-
-type TProps = {
-  pathname: string;
-  unpinnedTabs: TTabItem[];
-  handlePinTab: (id: string) => (action: 'pin' | 'unpin') => void;
-  removeTab: (id: string, type: 'pinnedTabs' | 'unpinnedTabs') => void;
-};
+import { useTabsCtx } from '../../hooks/use-tabs-ctx';
 
 const unpinnedTabsSx: SxProps = {
   flexDirection: 'row',
@@ -22,8 +16,9 @@ const unpinnedTabsSx: SxProps = {
   scrollbarWidth: 'none',
 };
 
-export const UnpinnedTabs = (props: TProps) => {
-  const { pathname, unpinnedTabs, handlePinTab, removeTab } = props;
+export const UnpinnedTabs = () => {
+  const { pathname, unpinnedTabs, removeTab, handlePinTab } = useTabsCtx();
+
   const containerRef = useScrollContainer();
 
   return (
@@ -70,11 +65,8 @@ export const UnpinnedTabs = (props: TProps) => {
           <ScrollShadowBar container={containerRef.current} />
 
           <OverflowMenu
-            pathname={pathname}
-            trackingTabs={unpinnedTabs}
-            stopObserving={!!snapshot.draggingFromThisWith}
-            handlePinTab={handlePinTab}
-            removeTab={removeTab}
+            observableContainer={containerRef.current}
+            pauseObserving={!!snapshot.draggingFromThisWith}
           />
         </>
       )}

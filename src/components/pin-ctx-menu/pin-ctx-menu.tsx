@@ -4,14 +4,10 @@ import { Menu, MenuItem, Typography } from '@mui/material';
 import { findItem } from '../../utils/utils';
 
 import PinTabIcon from '../../assets/icons/pin-tab-icon.svg?react';
+import { useTabsCtx } from '../../hooks/use-tabs-ctx';
 
-type TProps = {
-  unpinnedTabs: TTabItem[];
-  pinnedTabs: TTabItem[];
-  handlePinTab: (id: string) => (action: 'pin' | 'unpin') => void;
-};
-
-const PinCtxMenu = ({ unpinnedTabs, pinnedTabs, handlePinTab }: TProps) => {
+const PinCtxMenu = () => {
+  const { unpinnedTabs, pinnedTabs, handlePinTab } = useTabsCtx();
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
   const [isPinned, setIsPinned] = useState<boolean>(false);
   const tabIdRef = useRef<string | null>(null);
