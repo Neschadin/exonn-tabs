@@ -69,10 +69,7 @@ export const Tab = (props: TProps) => {
         data-tab-id={id}
         sx={getContainerSx({ isOverflow, isDragging, isClosing, isActive })}
         onContextMenu={handleCtxMenu}
-        
       >
-
-
         <Divider
           orientation='vertical'
           sx={getDividerSx({ isOverflow, showDivider })}
